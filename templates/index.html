@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rynex AI Chatbot</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="chat-wrapper">
+    <div class="chat-header">
+      <h1>🤖 Rynex AI</h1>
+      <p>Your personal car & editing assistant</p>
+    </div>
+
+    <div id="chat-box" class="chat-box">
+      <div class="bot-msg">Hey there 👋! I’m <b>Rynex AI</b>. Ask me anything about cars, editing, or tech!</div>
+    </div>
+
+    <div class="chat-input">
+      <input id="user-input" type="text" placeholder="Type your message..." autocomplete="off" />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById("chat-box");
+    const input = document.getElementById("user-input");
+
+    async function sendMessage() {
+      const message = input.value.trim();
+      if (!message) return;
+
+      addMessage("user", message);
+      input.value = "";
+
+      const typing = document.createElement("div");
+      typing.className = "bot-msg typing";
+      typing.textContent = "Rynex AI is typing...";
+      chatBox.appendChild(typing);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+
+      const data = await response.json();
+      typing.remove();
+      addMessage("bot", data.reply);
+    }
+
+    function addMessage(sender, text) {
+      const msg = document.createElement("div");
+      msg.className = sender === "user" ? "user-msg" : "bot-msg";
+      msg.textContent = text;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    input.addEventListener("keypress", e => {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
